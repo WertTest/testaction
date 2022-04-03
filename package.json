@@ -1,0 +1,11 @@
+{
+  "name": "meta-issues",
+  "version": "0.0.1",
+  "main": "index.js",
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "1.6.0",
+    "@actions/github": "5.0.1"
+  }
+}

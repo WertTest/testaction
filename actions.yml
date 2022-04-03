@@ -1,0 +1,15 @@
+name: meta-issues
+description: |
+  Creates sub issues for a meta-issue.
+inputs:
+  metaIssue:
+    description: |
+      The meta issue to create sub issues for.
+    required: true
+  token:
+    description: |
+      Token to use for issue creation.
+    required: true
+runs:
+  using: node16
+  main: index.js

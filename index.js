@@ -64,7 +64,7 @@ const requestWithAuth = request.defaults({
   // } 
 });
 
-const createdIssues = [];
+
 
 const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues", {
   token,
@@ -74,13 +74,6 @@ const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues
   body: "testbody",
 })
 .then(result => {
-  if (result && result.data && result.data.id) {
-    core.setOutput('id', result.data.id)
-  }
-  if (result && result.data && result.data.number) {
-    core.setOutput('number', result.data.number)
-  }
-  createdIssues.push(`${repo}/${result.data.number}`);
   return result;
 })
 .catch(error => {
@@ -88,11 +81,17 @@ const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues
 });
 
 
+const run = async () => {
+  const createdIssues = [];
+  retrieveRepos(metaIssue.body).forEach(async repo => {
+    const response = await createIssue(repo);
+    createdIssues.push(`${repo}/${response.data.number}`);
+  });
 
-retrieveRepos(metaIssue.body).forEach(async repo => {
-  const response = await createIssue(repo);
-  console.log("result", response);
+  console.log('OUTPUT', JSON.stringify(createdIssues));
+  core.setOutput('createdIssues', JSON.stringify(createdIssues));
+};
 
-});
+run();
 
-core.setOutput('createdIssues', JSON.stringify(createdIssues));
+

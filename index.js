@@ -83,8 +83,10 @@ const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues
 
 const run = async () => {
   const createdIssues = [];
-  retrieveRepos(metaIssue.body).forEach(async repo => {
+  await retrieveRepos(metaIssue.body).forEach(async repo => {
     const response = await createIssue(repo);
+
+    console.log('NR', JSON.stringify(createdIssues));
     createdIssues.push(`${repo}/${response.data.number}`);
   });
 

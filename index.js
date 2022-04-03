@@ -39,13 +39,17 @@ const metaIssue = parse_object("metaIssue");
 const token = default_parse("token");
 
 const owner = "WertTest";
-const repo = "RepoB";
-const repoRegex = /.*<!---repos-start--->(.*)<!---repos-end--->.*/m;
-const retrieveRepos = (body) => {
+const repoRegex = /.*<!---repos-start--->(.*)<!---repos-end--->.*/ms;
+const extractReposRegex = /- \[.\] ([^\r]*)/ms;
 
-  console.log("###### BODY", JSON.stringify(body));
-  const reposBody = body.match(repoRegex);
-  console.log("###### REPOS BODY", JSON.stringify(reposBody));
+const retrieveRepos = (body) => {
+  const reposBody = body.match(repoRegex)[1];
+  if(reposBody){
+    return reposBody.split('\r\n')
+                              .filter(line => line.startsWith('- ['))
+                              .map(line => line.match(extractReposRegex)[1]);
+  }
+  return [];
 };
 
 const requestWithAuth = request.defaults({
@@ -60,26 +64,27 @@ const requestWithAuth = request.defaults({
   // } 
 });
 
-retrieveRepos(metaIssue.body);
+const createdIssues = [];
 
-requestWithAuth("post /repos/{owner}/{repo}/issues", {
-    token,
-    owner,
-    repo,
-    title: `[META ${metaIssue.number}] ${metaIssue.title}`,
-    body: "testbody",
+const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues", {
+  token,
+  owner,
+  repo,
+  title: `[META ${metaIssue.number}] ${metaIssue.title}`,
+  body: "testbody",
 })
-  .then(result => {
-    console.log("result", result);
-    if (result && result.data && result.data.id) {
-      core.setOutput('id', result.data.id)
-    }
-    if (result && result.data && result.data.number) {
-      core.setOutput('number', result.data.number)
-    }
-  })
-  .catch(error => {
-    console.log("error", error);
-  });
+.then(result => {
+  return result;
+})
+.catch(error => {
+  console.log("error", error);
+});
 
-  core.setOutput('SELECTED_COLOR', 'green');
+
+
+retrieveRepos(metaIssue.body).forEach(repo => {
+  const response = createIssue(repo);
+  createdIssues.push(`${repo}/${response.data.number}`);
+});
+
+core.setOutput('createdIssues', JSON.stringify(createdIssues));

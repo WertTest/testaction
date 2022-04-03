@@ -43,6 +43,7 @@ const repo = "RepoB";
 const repoRegex = /.*<!---repos-start--->(.*)<!---repos-end--->.*/m;
 const retrieveRepos = (body) => {
 
+  console.log("###### BODY", JSON.stringify(body));
   const reposBody = body.match(repoRegex);
   console.log("###### REPOS BODY", JSON.stringify(reposBody));
 };

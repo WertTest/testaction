@@ -81,7 +81,7 @@ const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues
     core.setOutput('number', result.data.number)
   }
   createdIssues.push(`${repo}/${result.data.number}`);
-  resolve(result);
+  return result;
 })
 .catch(error => {
   console.log("error", error);
@@ -89,8 +89,8 @@ const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues
 
 
 
-retrieveRepos(metaIssue.body).forEach(repo => {
-  const response = createIssue(repo);
+retrieveRepos(metaIssue.body).forEach(async repo => {
+  const response = await createIssue(repo);
   console.log("result", response);
 
 });

@@ -40,10 +40,10 @@ const token = default_parse("token");
 
 const owner = "WertTest";
 const repo = "RepoB";
-const repoRegex = /<!---repos-start--->(.*)<!---repos-end--->/g;
+const repoRegex = /.*<!---repos-start--->(.*)<!---repos-end--->.*/g;
 const retrieveRepos = (body) => {
 
-  const reposBody = body.match(repoRegex)[0];
+  const reposBody = body.match(repoRegex);
   console.log("###### REPOS BODY", reposBody);
 };
 

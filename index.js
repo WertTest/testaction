@@ -81,7 +81,7 @@ const createIssue = (repo) => requestWithAuth("post /repos/{owner}/{repo}/issues
     core.setOutput('number', result.data.number)
   }
   createdIssues.push(`${repo}/${result.data.number}`);
-  return result;
+  resolve(result);
 })
 .catch(error => {
   console.log("error", error);

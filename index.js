@@ -40,6 +40,12 @@ const token = default_parse("token");
 
 const owner = "WertTest";
 const repo = "RepoB";
+const repoRegex = /<!---repos-start--->(.*)<!---repos-end--->/g;
+const retrieveRepos = (body) => {
+
+  const reposBody = body.match(repoRegex)[0];
+  console.log("###### REPOS BODY", reposBody);
+};
 
 const requestWithAuth = request.defaults({
   headers: {
@@ -52,6 +58,8 @@ const requestWithAuth = request.defaults({
   //   ]
   // } 
 });
+
+retrieveRepos(metaIssue.body);
 
 requestWithAuth("post /repos/{owner}/{repo}/issues", {
     token,
@@ -71,5 +79,6 @@ requestWithAuth("post /repos/{owner}/{repo}/issues", {
   })
   .catch(error => {
     console.log("error", error);
-    core.setFailed(error.message);
   });
+
+  core.setOutput('SELECTED_COLOR', 'green');

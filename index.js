@@ -13,11 +13,6 @@ function parse_array(input_name) {
   return input_value.split(",");
 }
 
-function parse_boolean(input_name) {
-  const input_value = core.getInput(input_name);
-  return input_value === "true";
-}
-
 function parse_object(input_name) {
   const input_value = core.getInput(input_name);
   return JSON.parse(input_value);
@@ -41,7 +36,7 @@ const metaIssueLabels = metaIssue.labels.map(l => l.name);
 const labelsToExclude = parse_array("labelsToExclude");
 const owner = metaIssue.repository_url.match(/https.*\/repos\/([^\/]*)\/.*/)[1];
 const token = default_parse("token");
-const bodyRegex = /(.*)(<!---repos-start--->.*<!---repos-end--->)(.*)/ms;
+const bodyRegex = new RegExp(default_parse('bodyRegex'),'ms');
 const extractReposRegex = /- \[.\] ([^\r]*)/ms;
 
 const requestWithAuth = request.defaults({

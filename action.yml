@@ -14,6 +14,10 @@ inputs:
     description: |
       The labels to exclude for sub issues.
     required: true
+  specLabel:
+    description: |
+      The label to use for spec issues.
+    required: true
   bodyRegex:
     description: |
       The regex to use for extracting issue creation list in meta issue body.

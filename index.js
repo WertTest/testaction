@@ -34,6 +34,7 @@ const metaIssue = parse_object("metaIssue");
 const metaIssueRepo = metaIssue.repository_url.match(/https.*\/repos\/[^\/]*\/(.*)/)[1];
 const metaIssueLabels = metaIssue.labels.map(l => l.name);
 const labelsToExclude = parse_array("labelsToExclude");
+const specLabel = default_parse("specLabel");
 const owner = metaIssue.repository_url.match(/https.*\/repos\/([^\/]*)\/.*/)[1];
 const token = default_parse("token");
 const bodyRegex = new RegExp(default_parse('bodyRegex'),'ms');
@@ -100,7 +101,7 @@ const run = async () => {
     if(repos.some(r => r.toLowerCase().startsWith('spec'))){
       repos = repos.filter(r => !(r.toLowerCase().startsWith('spec')));
       const specIssueBody = `See meta issue for the description:\r\n- [ ] ${metaIssue.html_url}`
-      const specResponse = await createIssue(metaIssueRepo, `[META ${metaIssue.number}] Spec: ${metaIssue.title}`, specIssueBody, labelsForSubIssues);
+      const specResponse = await createIssue(metaIssueRepo, `[META ${metaIssue.number}] Spec: ${metaIssue.title}`, specIssueBody, [...labelsForSubIssues, specLabel]);
       specIssueNumber = specResponse.data.number;
     }
 

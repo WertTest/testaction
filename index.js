@@ -96,10 +96,11 @@ const run = async () => {
   const createdIssues = [];
   const bodyMatchArray = metaIssue.body.match(bodyRegex);
   if(bodyMatchArray || bodyMatchArray.length === 4){
-    const repos = bodyMatchArray[2].split('\n').filter(line => line.startsWith('- [x]')).map(line => line.match(extractReposRegex)[1].trim());
+    var repos = bodyMatchArray[2].split('\n').filter(line => line.startsWith('- [x]')).map(line => line.match(extractReposRegex)[1].trim());
     
     var specIssueNumber = undefined;
     if(repos.some(r => r.toLowerCase().startsWith('spec'))){
+      repos = repos.filter(r => !(r.toLowerCase().startsWith('spec')));
       const specIssueBody = `See meta issue for the description:\r\n- [ ] ${metaIssue.html_url}`
       const specResponse = await createIssue(metaIssueRepo, `[META ${metaIssue.number}] Spec: ${metaIssue.title}`, specIssueBody);
       specIssueNumber = specResponse.data.number;
@@ -109,7 +110,9 @@ const run = async () => {
           + (specIssueNumber ? `- [ ] Spec issue: https://github.com/${owner}/${metaIssueRepo}/issues/${specIssueNumber}\r\n` : '');
     for (const repo of repos) {
       const response = await createIssue(repo, `[META ${metaIssue.number}] ${metaIssue.title}`, subIssueBody);
-      createdIssues.push(`${owner}/${repo}/issues/${response.data.number}`);
+      if(response.status < 400){
+        createdIssues.push(`${owner}/${repo}/issues/${response.data.number}`);
+      }
     }
 
     const metaIssueBody = `${bodyMatchArray[1]}\r\n${bodyMatchArray[3]}\r\n\r\n`;

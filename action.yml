@@ -10,6 +10,16 @@ inputs:
     description: |
       Token to use for issue creation.
     required: true
+  labelsToExclude:
+    description: |
+      The labels to exclude for sub issues.
+    required: true
+  bodyRegex:
+    description: |
+      The regex to use for extracting issue creation list in meta issue body.
+    required: true
+
+
 runs:
   using: node16
   main: index.js

@@ -37,6 +37,8 @@ function default_parse(input_name) {
 
 const metaIssue = parse_object("metaIssue");
 const metaIssueRepo = metaIssue.repository_url.match(/https.*\/repos\/[^\/]*\/(.*)/)[1];
+const metaIssueLabels = metaIssue.labels.map(l => l.name);
+const labelsToExclude = parse_array("labelsToExclude");
 const owner = metaIssue.repository_url.match(/https.*\/repos\/([^\/]*)\/.*/)[1];
 const token = default_parse("token");
 const bodyRegex = /(.*)(<!---repos-start--->.*<!---repos-end--->)(.*)/ms;
@@ -48,12 +50,13 @@ const requestWithAuth = request.defaults({
   }
 });
 
-const createIssue = (repo, title, body) => requestWithAuth("post /repos/{owner}/{repo}/issues", {
+const createIssue = (repo, title, body, labels) => requestWithAuth("post /repos/{owner}/{repo}/issues", {
   token,
   owner,
   repo,
   title,
   body,
+  labels
 })
 .then(result => {
   return result;
@@ -95,21 +98,21 @@ const updateMetaIssue = async (agentIssues, specIssue, oldBody) => {
 const run = async () => {
   const createdIssues = [];
   const bodyMatchArray = metaIssue.body.match(bodyRegex);
-  if(bodyMatchArray || bodyMatchArray.length === 4){
+  if(bodyMatchArray && bodyMatchArray.length === 4){
     var repos = bodyMatchArray[2].split('\n').filter(line => line.startsWith('- [x]')).map(line => line.match(extractReposRegex)[1].trim());
-    
+    const labelsForSubIssues = metaIssueLabels.filter(l => !labelsToExclude.includes(l));
     var specIssueNumber = undefined;
     if(repos.some(r => r.toLowerCase().startsWith('spec'))){
       repos = repos.filter(r => !(r.toLowerCase().startsWith('spec')));
       const specIssueBody = `See meta issue for the description:\r\n- [ ] ${metaIssue.html_url}`
-      const specResponse = await createIssue(metaIssueRepo, `[META ${metaIssue.number}] Spec: ${metaIssue.title}`, specIssueBody);
+      const specResponse = await createIssue(metaIssueRepo, `[META ${metaIssue.number}] Spec: ${metaIssue.title}`, specIssueBody, labelsForSubIssues);
       specIssueNumber = specResponse.data.number;
     }
 
     const subIssueBody = `See meta issue${specIssueNumber ? ' and spec ' : ' '}for the description and details:\r\n- [ ] Meta issue: ${metaIssue.html_url}\r\n`
           + (specIssueNumber ? `- [ ] Spec issue: https://github.com/${owner}/${metaIssueRepo}/issues/${specIssueNumber}\r\n` : '');
     for (const repo of repos) {
-      const response = await createIssue(repo, `[META ${metaIssue.number}] ${metaIssue.title}`, subIssueBody);
+      const response = await createIssue(repo, `[META ${metaIssue.number}] ${metaIssue.title}`, subIssueBody, labelsForSubIssues);
       if(response.status < 400){
         createdIssues.push(`${owner}/${repo}/issues/${response.data.number}`);
       }
@@ -126,5 +129,3 @@ const run = async () => {
 };
 
 run();
-
-

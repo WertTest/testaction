@@ -39,7 +39,7 @@ const owner = metaIssue.repository_url.match(/https.*\/repos\/([^\/]*)\/.*/)[1];
 const token = default_parse("token");
 const bodyRegex = new RegExp(default_parse('bodyRegex'),'ms');
 const extractReposRegex = /- \[.\] ([^\r]*)/ms;
-
+const milestoneBadgeTemplate = '<img alt="Milestone" src="https://img.shields.io/badge/dynamic/json?label=milestone&query=milestone.title&url=https://api.github.com/repos/[ISSUE_PATH]" align="top">';
 const requestWithAuth = request.defaults({
   headers: {
     authorization: `Bearer ${token}`
@@ -64,16 +64,15 @@ const createIssue = (repo, title, body, labels) => requestWithAuth("post /repos/
 const updateMetaIssue = async (agentIssues, specIssue, oldBody) => {
   var overviewSection = "";
   if (specIssue) {
-    const specMilestoneBadge = `![Milestone](https://img.shields.io/badge/dynamic/json?label=milestone&query=milestone.title&url=https://api.github.com/repos/${specIssue})`;
+   
     overviewSection = overviewSection + "## Spec Issue\r\n";
-    overviewSection = overviewSection + `- [ ] https://github.com/${specIssue} ${specMilestoneBadge}\r\n`;
+    overviewSection = overviewSection + `- [ ] https://github.com/${specIssue} ${milestoneBadgeTemplate.replace('[ISSUE_PATH]', specIssue)}\r\n`;
     overviewSection = overviewSection + "\r\n";
   }
   if(agentIssues.length > 0){
     overviewSection = overviewSection + "## Agent Issues\r\n";
     for (const aIssue of agentIssues) {
-      const milestoneBadge = `![Milestone](https://img.shields.io/badge/dynamic/json?label=milestone&query=milestone.title&url=https://api.github.com/repos/${aIssue})`;
-      overviewSection = overviewSection + `- [ ] https://github.com/${aIssue} ${milestoneBadge}\r\n`;
+      overviewSection = overviewSection + `- [ ] https://github.com/${aIssue} ${milestoneBadgeTemplate.replace('[ISSUE_PATH]', aIssue)}\r\n`;
     }
   }
 
